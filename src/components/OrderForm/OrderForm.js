@@ -1,55 +1,75 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useState } from 'react/cjs/react.development';
 
-class OrderForm extends Component {
-  constructor(props) {
-    super();
-    this.props = props;
-    this.state = {
-      name: '',
-      ingredients: []
-    };
+const OrderForm = ({ handleNewOrder }) => {
+  const [name, setName] = useState('')
+  const [ingredients, setIngredients] = useState([])
+  const [error, setError] = useState('')
+
+  const handleNameChange = (event) => {
+    event.preventDefault()
+    setName(event.target.value)
   }
 
-
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.clearInputs();
+
+    if (!name) {
+      setError('Please Enter a Name!')
+      return
+    }
+    if (!ingredients.length) {
+      setError('Please select at least one ingredient!')
+      return
+    }
+      handleNewOrder({
+        name,
+        ingredients
+      })
+      clearInputs();
+      setError('')
   }
 
-  clearInputs = () => {
-    this.setState({name: '', ingredients: []});
+  const clearInputs = () => {
+    setName('');
+    setIngredients([])
   }
 
-  render() {
-    const possibleIngredients = ['beans', 'steak', 'carnitas', 'sofritas', 'lettuce', 'queso fresco', 'pico de gallo', 'hot sauce', 'guacamole', 'jalapenos', 'cilantro', 'sour cream'];
-    const ingredientButtons = possibleIngredients.map(ingredient => {
-      return (
-        <button key={ingredient} name={ingredient} onClick={e => this.handleIngredientChange(e)}>
-          {ingredient}
-        </button>
-      )
-    });
+  const handleIngredientChange = (event) => {
+    event.preventDefault()
+    if (!ingredients.includes(event.target.value))
+    setIngredients([...ingredients, event.target.value])
+  }
 
+  const possibleIngredients = ['beans', 'steak', 'carnitas', 'sofritas', 'lettuce', 'queso fresco', 'pico de gallo', 'hot sauce', 'guacamole', 'jalapenos', 'cilantro', 'sour cream'];
+  const ingredientButtons = possibleIngredients.map(ingredient => {
     return (
-      <form>
-        <input
-          type='text'
-          placeholder='Name'
-          name='name'
-          value={this.state.name}
-          onChange={e => this.handleNameChange(e)}
-        />
-
-        { ingredientButtons }
-
-        <p>Order: { this.state.ingredients.join(', ') || 'Nothing selected' }</p>
-
-        <button onClick={e => this.handleSubmit(e)}>
-          Submit Order
-        </button>
-      </form>
+      <button className='order-form-button' key={ingredient} value={ingredient} onClick={event => handleIngredientChange(event)}>
+        {ingredient}
+      </button>
     )
-  }
+  });
+
+  return (
+    <form>
+      <input
+        type='text'
+        placeholder='Name'
+        name='name'
+        value={name}
+        onChange={event => handleNameChange(event)}
+      />
+
+      {ingredientButtons}
+
+      {error && <p className='order-form-error'>{error}</p>}
+      <p className='order-form-selected-ingredients'>Order: {ingredients.join(', ') || 'Nothing selected'}</p>
+
+      <button className='order-form-submit-btn' onClick={event => handleSubmit(event)}>
+        Submit Order
+      </button>
+    </form>
+  )
 }
 
 export default OrderForm;
